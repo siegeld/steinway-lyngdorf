@@ -29,6 +29,8 @@ class MediaApiClient:
         self.port = port
         self.base_url = f"http://{host}:{port}"
         self._session: Optional[aiohttp.ClientSession] = None
+        self._api_available = True
+        self._last_403_logged = False
     
     async def __aenter__(self):
         """Async context manager entry."""
@@ -60,10 +62,27 @@ class MediaApiClient:
             "roles": roles
         }
         
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+            "Accept": "application/json, text/plain, */*",
+            "Accept-Language": "en-US,en;q=0.9",
+            "Cache-Control": "no-cache",
+            "Pragma": "no-cache",
+            "Referer": f"http://{self.host}:{self.port}/"
+        }
+        
         try:
-            async with self._session.get(url, params=params, timeout=5) as response:
+            async with self._session.get(url, params=params, headers=headers, timeout=5) as response:
                 if response.status == 200:
+                    self._api_available = True
+                    self._last_403_logged = False
                     return await response.json()
+                elif response.status == 403:
+                    self._api_available = False
+                    if not self._last_403_logged:
+                        logger.warning("HTTP API access forbidden (403). Media features will be disabled.")
+                        self._last_403_logged = True
+                    return None
                 else:
                     logger.error(f"API request failed: {response.status}")
                     return None
@@ -79,8 +98,10 @@ class MediaApiClient:
         Get current media information.
         
         Returns:
-            MediaInfo object or None if no media playing
+            MediaInfo object or None if no media playing or API unavailable
         """
+        if not self._api_available:
+            return None
         # Fetch player data
         data = await self._request(
             "player:player/data",
@@ -171,8 +192,17 @@ class MediaApiClient:
             "value": json.dumps(value)
         }
         
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+            "Accept": "application/json, text/plain, */*",
+            "Accept-Language": "en-US,en;q=0.9",
+            "Cache-Control": "no-cache",
+            "Pragma": "no-cache",
+            "Referer": f"http://{self.host}:{self.port}/"
+        }
+        
         try:
-            async with self._session.get(url, params=params, timeout=5) as response:
+            async with self._session.get(url, params=params, headers=headers, timeout=5) as response:
                 if response.status == 200:
                     return True
                 else:

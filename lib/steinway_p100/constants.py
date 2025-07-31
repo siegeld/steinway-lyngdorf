@@ -5,19 +5,22 @@ from enum import Enum, IntEnum
 
 class PowerState(IntEnum):
     """Power states."""
+
     OFF = 0
     ON = 1
 
 
 class FeedbackLevel(IntEnum):
     """Feedback verbosity levels."""
+
     MINIMAL = 0  # Only respond to queries
-    STATUS = 1   # Auto status updates
-    ECHO = 2     # Echo commands + status
+    STATUS = 1  # Auto status updates
+    ECHO = 2  # Echo commands + status
 
 
 class Zone(Enum):
     """Zone identifiers."""
+
     MAIN = "MAIN"
     ZONE2 = "ZONE2"
 

@@ -79,6 +79,14 @@ class SteinwayLyngdorfCoordinator(DataUpdateCoordinator):
                     # Audio type
                     data["audio_type"] = await self.device.audio_mode.get_audio_type()
                     
+                    # Media information if available
+                    if self.device.media:
+                        try:
+                            media_info = await self.device.media.get_media_info()
+                            data["media_info"] = media_info
+                        except Exception as err:
+                            _LOGGER.debug("Error fetching media info: %s", err)
+                    
                 except Exception as err:
                     _LOGGER.debug("Error fetching extended data: %s", err)
             

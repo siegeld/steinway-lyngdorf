@@ -21,6 +21,7 @@ from homeassistant.helpers.entity_platform import (
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from steinway_p100 import PowerState
+from steinway_p100.api.models import PlaybackState
 from steinway_p100.exceptions import CommandError
 
 from .const import (
@@ -114,6 +115,15 @@ class SteinwayLyngdorfMediaPlayer(CoordinatorEntity[SteinwayLyngdorfCoordinator]
             | MediaPlayerEntityFeature.SELECT_SOURCE
         )
         
+        # Add media control features if media API is available
+        if coordinator.device.media:
+            self._attr_supported_features |= (
+                MediaPlayerEntityFeature.PLAY
+                | MediaPlayerEntityFeature.PAUSE
+                | MediaPlayerEntityFeature.NEXT_TRACK
+                | MediaPlayerEntityFeature.PREVIOUS_TRACK
+            )
+        
         self._source_list: list[str] = []
         self._audio_modes: list[str] = []
         
@@ -143,9 +153,18 @@ class SteinwayLyngdorfMediaPlayer(CoordinatorEntity[SteinwayLyngdorfCoordinator]
             return MediaPlayerState.OFF
             
         power_state = self.coordinator.data.get("power_state", PowerState.OFF)
-        if power_state == PowerState.ON:
-            return MediaPlayerState.ON
-        return MediaPlayerState.OFF
+        if power_state == PowerState.OFF:
+            return MediaPlayerState.OFF
+        
+        # Check media playback state if available
+        media_info = self.coordinator.data.get("media_info")
+        if media_info:
+            if media_info.state == PlaybackState.PLAYING:
+                return MediaPlayerState.PLAYING
+            elif media_info.state == PlaybackState.PAUSED:
+                return MediaPlayerState.PAUSED
+        
+        return MediaPlayerState.IDLE
     
     @property
     def volume_level(self) -> float | None:
@@ -175,6 +194,50 @@ class SteinwayLyngdorfMediaPlayer(CoordinatorEntity[SteinwayLyngdorfCoordinator]
         return self._source_list
     
     @property
+    def media_title(self) -> str | None:
+        """Return the title of current playing media."""
+        if not self.coordinator.data:
+            return None
+        media_info = self.coordinator.data.get("media_info")
+        return media_info.title if media_info else None
+    
+    @property
+    def media_artist(self) -> str | None:
+        """Return the artist of current playing media."""
+        if not self.coordinator.data:
+            return None
+        media_info = self.coordinator.data.get("media_info")
+        return media_info.artist if media_info else None
+    
+    @property
+    def media_album_name(self) -> str | None:
+        """Return the album name of current playing media."""
+        if not self.coordinator.data:
+            return None
+        media_info = self.coordinator.data.get("media_info")
+        return media_info.album if media_info else None
+    
+    @property
+    def media_position(self) -> int | None:
+        """Position of current playing media in seconds."""
+        if not self.coordinator.data:
+            return None
+        media_info = self.coordinator.data.get("media_info")
+        if media_info and media_info.position_ms:
+            return media_info.position_ms // 1000
+        return None
+    
+    @property
+    def media_duration(self) -> int | None:
+        """Duration of current playing media in seconds."""
+        if not self.coordinator.data:
+            return None
+        media_info = self.coordinator.data.get("media_info")
+        if media_info and media_info.duration_ms:
+            return media_info.duration_ms // 1000
+        return None
+    
+    @property
     def extra_state_attributes(self) -> dict[str, Any]:
         """Return entity specific state attributes."""
         attrs = {
@@ -184,6 +247,14 @@ class SteinwayLyngdorfMediaPlayer(CoordinatorEntity[SteinwayLyngdorfCoordinator]
         if self.coordinator.data:
             attrs[ATTR_AUDIO_MODE] = self.coordinator.data.get("audio_mode")
             attrs[ATTR_AUDIO_TYPE] = self.coordinator.data.get("audio_type")
+            
+            # Add media info attributes
+            media_info = self.coordinator.data.get("media_info")
+            if media_info:
+                attrs["media_service"] = media_info.service
+                attrs["media_audio_format"] = media_info.audio_format
+                if media_info.bit_rate:
+                    attrs["media_bitrate"] = media_info.bit_rate
             
         return attrs
     
@@ -259,3 +330,27 @@ class SteinwayLyngdorfMediaPlayer(CoordinatorEntity[SteinwayLyngdorfCoordinator]
         level = max(0.0, min(1.0, level))
         # Linear mapping from 0-1 to dB range
         return MIN_VOLUME_DB + (level * (MAX_VOLUME_DB - MIN_VOLUME_DB))
+    
+    async def async_media_play(self) -> None:
+        """Send play command."""
+        if self.coordinator.device.media:
+            await self.coordinator.device.media.play()
+            await self.coordinator.async_request_refresh()
+    
+    async def async_media_pause(self) -> None:
+        """Send pause command."""
+        if self.coordinator.device.media:
+            await self.coordinator.device.media.pause()
+            await self.coordinator.async_request_refresh()
+    
+    async def async_media_next_track(self) -> None:
+        """Send next track command."""
+        if self.coordinator.device.media:
+            await self.coordinator.device.media.next_track()
+            await self.coordinator.async_request_refresh()
+    
+    async def async_media_previous_track(self) -> None:
+        """Send previous track command."""
+        if self.coordinator.device.media:
+            await self.coordinator.device.media.previous_track()
+            await self.coordinator.async_request_refresh()

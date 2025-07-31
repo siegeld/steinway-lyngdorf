@@ -150,7 +150,24 @@ git tag -a "v$NEW_VERSION" -m "Release v$NEW_VERSION"
 echo -e "${GREEN}✓ Commit workflow completed successfully!${NC}"
 echo -e "Version bumped from ${YELLOW}$CURRENT_VERSION${NC} to ${GREEN}$NEW_VERSION${NC}"
 echo -e "Tagged as: ${GREEN}v$NEW_VERSION${NC}"
+
+# 11. Push to remotes
 echo ""
-echo -e "Next steps:"
-echo -e "  - Push changes: ${YELLOW}git push origin main${NC}"
-echo -e "  - Push tags: ${YELLOW}git push origin v$NEW_VERSION${NC}"
+echo -e "${YELLOW}Pushing to remotes...${NC}"
+
+# Push to origin if it exists
+if git remote | grep -q '^origin$'; then
+    echo -e "Pushing to origin..."
+    git push origin main
+    git push origin "v$NEW_VERSION"
+fi
+
+# Push to nfsrbr1 if it exists
+if git remote | grep -q '^nfsrbr1$'; then
+    echo -e "Pushing to nfsrbr1..."
+    git push nfsrbr1 main
+    git push nfsrbr1 "v$NEW_VERSION"
+fi
+
+echo ""
+echo -e "${GREEN}✓ All done!${NC}"

@@ -15,7 +15,7 @@ else:
     __version__ = "0.1.0"  # Fallback version
 __all__ = [
     "SteinwayP100Device",
-    "TCPConnection", 
+    "TCPConnection",
     "SerialConnection",
     "SteinwayError",
     "ConnectionError",

@@ -16,6 +16,7 @@ setup(
         "pyserial-asyncio>=0.6",
         "click>=8.0",
         "python-dotenv>=0.19",
+        "aiohttp>=3.8",
     ],
     extras_require={
         "dev": [

@@ -445,6 +445,152 @@ def audio_type(device):
     asyncio.run(_type())
 
 
+@cli.group()
+@click.pass_obj
+def media(device):
+    """Media playback information and control."""
+    pass
+
+
+@media.command('info')
+@click.pass_obj
+def media_info(device):
+    """Show current media information."""
+    async def _info():
+        if not device.media:
+            print("Media API not available (no host configured)")
+            return
+            
+        async with device.media:
+            info = await device.media.get_media_info()
+            
+            if not info:
+                print("No media playing")
+                return
+            
+            # Display media info
+            print("Now Playing:")
+            if info.title:
+                print(f"  Title: {info.title}")
+            if info.artist:
+                print(f"  Artist: {info.artist}")
+            if info.album:
+                print(f"  Album: {info.album}")
+            if info.service:
+                print(f"  Service: {info.service}")
+            
+            # Playback info
+            print(f"\nPlayback: {info.state.value}")
+            if info.position_ms and info.duration_ms:
+                pos_sec = info.position_ms // 1000
+                dur_sec = info.duration_ms // 1000
+                pos_min, pos_sec = divmod(pos_sec, 60)
+                dur_min, dur_sec = divmod(dur_sec, 60)
+                print(f"  Position: {pos_min}:{pos_sec:02d} / {dur_min}:{dur_sec:02d}")
+                if info.progress_percent:
+                    print(f"  Progress: {info.progress_percent:.1f}%")
+            
+            # Audio format
+            if info.audio_format != "Unknown":
+                print(f"\nAudio Format: {info.audio_format}")
+                if info.bit_rate:
+                    print(f"  Bit Rate: {info.bit_rate:,} bps")
+            
+    asyncio.run(_info())
+
+
+@media.command('play')
+@click.pass_obj
+def media_play(device):
+    """Resume playback."""
+    async def _play():
+        if not device.media:
+            print("Media API not available (no host configured)")
+            return
+            
+        async with device.media:
+            if await device.media.play():
+                print("Playback resumed")
+            else:
+                print("Failed to resume playback")
+                
+    asyncio.run(_play())
+
+
+@media.command('pause')
+@click.pass_obj
+def media_pause(device):
+    """Pause playback."""
+    async def _pause():
+        if not device.media:
+            print("Media API not available (no host configured)")
+            return
+            
+        async with device.media:
+            if await device.media.pause():
+                print("Playback paused")
+            else:
+                print("Failed to pause playback")
+                
+    asyncio.run(_pause())
+
+
+@media.command('toggle')
+@click.pass_obj
+def media_toggle(device):
+    """Toggle play/pause."""
+    async def _toggle():
+        if not device.media:
+            print("Media API not available (no host configured)")
+            return
+            
+        async with device.media:
+            if await device.media.play_pause():
+                info = await device.media.get_media_info()
+                if info:
+                    print(f"Playback {info.state.value}")
+            else:
+                print("Failed to toggle playback")
+                
+    asyncio.run(_toggle())
+
+
+@media.command('next')
+@click.pass_obj
+def media_next(device):
+    """Skip to next track."""
+    async def _next():
+        if not device.media:
+            print("Media API not available (no host configured)")
+            return
+            
+        async with device.media:
+            if await device.media.next_track():
+                print("Skipped to next track")
+            else:
+                print("Failed to skip track")
+                
+    asyncio.run(_next())
+
+
+@media.command('prev')
+@click.pass_obj
+def media_prev(device):
+    """Skip to previous track."""
+    async def _prev():
+        if not device.media:
+            print("Media API not available (no host configured)")
+            return
+            
+        async with device.media:
+            if await device.media.previous_track():
+                print("Skipped to previous track")
+            else:
+                print("Failed to skip track")
+                
+    asyncio.run(_prev())
+
+
 @cli.command()
 @click.pass_obj
 @click.option('--duration', '-d', default=0, help='Monitor duration in seconds (0=forever)')

@@ -66,6 +66,10 @@ class SteinwayLyngdorfCoordinator(DataUpdateCoordinator):
                     # Volume
                     data["volume"] = await self.device.volume.get()
                     
+                    # Mute status - The P100 doesn't reliably respond to MUTE?
+                    # so we don't query it to avoid timeouts
+                    data["is_muted"] = False
+                    
                     # Source
                     current_source = await self.device.source.get_current()
                     data["source_name"] = current_source.name

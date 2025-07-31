@@ -10,6 +10,7 @@ from homeassistant.components.media_player import (
     MediaPlayerEntity,
     MediaPlayerEntityFeature,
     MediaPlayerState,
+    MediaType,
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
@@ -126,6 +127,7 @@ class SteinwayLyngdorfMediaPlayer(CoordinatorEntity[SteinwayLyngdorfCoordinator]
         
         self._source_list: list[str] = []
         self._audio_modes: list[str] = []
+        self._is_muted: bool = False  # Track mute state locally
         
     async def async_added_to_hass(self) -> None:
         """Run when entity is added to hass."""
@@ -178,8 +180,8 @@ class SteinwayLyngdorfMediaPlayer(CoordinatorEntity[SteinwayLyngdorfCoordinator]
     @property
     def is_volume_muted(self) -> bool:
         """Return true if volume is muted."""
-        # The P100 doesn't report mute status reliably, so we track it locally
-        return False
+        # P100 doesn't report mute status reliably, so we track it locally
+        return self._is_muted
     
     @property
     def source(self) -> str | None:
@@ -238,6 +240,33 @@ class SteinwayLyngdorfMediaPlayer(CoordinatorEntity[SteinwayLyngdorfCoordinator]
         return None
     
     @property
+    def media_content_id(self) -> str | None:
+        """Content ID of current playing media."""
+        if not self.coordinator.data:
+            return None
+        media_info = self.coordinator.data.get("media_info")
+        if media_info and (media_info.title or media_info.artist):
+            # Return something to indicate media is present
+            return f"{media_info.service or 'steinway'}:{media_info.title or 'Unknown'}"
+        return None
+    
+    @property
+    def media_content_type(self) -> str | None:
+        """Content type of current playing media."""
+        if not self.coordinator.data:
+            return None
+        media_info = self.coordinator.data.get("media_info")
+        return MediaType.MUSIC if media_info else None
+    
+    @property
+    def media_image_url(self) -> str | None:
+        """Image URL of current playing media."""
+        if not self.coordinator.data:
+            return None
+        media_info = self.coordinator.data.get("media_info")
+        return media_info.icon_url if media_info else None
+    
+    @property
     def extra_state_attributes(self) -> dict[str, Any]:
         """Return entity specific state attributes."""
         attrs = {
@@ -290,7 +319,8 @@ class SteinwayLyngdorfMediaPlayer(CoordinatorEntity[SteinwayLyngdorfCoordinator]
             await self.coordinator.device.volume.mute()
         else:
             await self.coordinator.device.volume.unmute()
-        await self.coordinator.async_request_refresh()
+        self._is_muted = mute
+        self.async_write_ha_state()
     
     async def async_select_source(self, source: str) -> None:
         """Select input source."""

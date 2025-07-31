@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import logging
+import socket
 from typing import Any
 
 import voluptuous as vol
@@ -37,19 +38,35 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors: dict[str, str] = {}
         
         if user_input is not None:
-            # Test the connection
-            device = SteinwayP100Device.from_tcp(
-                user_input[CONF_HOST],
-                user_input[CONF_PORT]
-            )
+            # Test DNS resolution first
+            host = user_input[CONF_HOST]
+            port = user_input[CONF_PORT]
             
             try:
+                ip = socket.gethostbyname(host)
+                _LOGGER.info(f"DNS resolved {host} to {ip}")
+            except socket.gaierror as e:
+                _LOGGER.error(f"DNS resolution failed for {host}: {e}")
+                errors["base"] = "cannot_connect"
+                return self.async_show_form(
+                    step_id="user",
+                    data_schema=STEP_USER_DATA_SCHEMA,
+                    errors=errors,
+                )
+            
+            # Test the connection
+            device = SteinwayP100Device.from_tcp(host, port)
+            
+            try:
+                _LOGGER.info(f"Attempting to connect to {host}:{port}")
                 await device.connect()
                 await device.disconnect()
-            except ConnectionError:
+                _LOGGER.info(f"Successfully connected to {host}:{port}")
+            except ConnectionError as e:
+                _LOGGER.error(f"Connection error to {host}:{port}: {e}")
                 errors["base"] = "cannot_connect"
-            except Exception:
-                _LOGGER.exception("Unexpected exception")
+            except Exception as e:
+                _LOGGER.exception(f"Unexpected exception connecting to {host}:{port}: {e}")
                 errors["base"] = "unknown"
             else:
                 # Connection successful

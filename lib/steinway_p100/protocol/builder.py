@@ -96,3 +96,47 @@ class CommandBuilder:
     def source_query() -> str:
         """Build source query command."""
         return "SRC?"
+        
+    @staticmethod
+    def zone2_volume_set(volume: float) -> str:
+        """Build zone 2 volume set command."""
+        vol_int = int(volume * 10)
+        if vol_int < -999 or vol_int > 240:
+            raise ValueError(f"Zone 2 volume {volume} dB out of range")
+        return f"ZVOL({vol_int})"
+        
+    @staticmethod
+    def zone2_volume_up(step: Optional[float] = None) -> str:
+        """Build zone 2 volume up command."""
+        if step is None:
+            return "ZVOL+"
+        else:
+            step_int = int(step * 10)
+            return f"ZVOL+({step_int})"
+            
+    @staticmethod
+    def zone2_volume_down(step: Optional[float] = None) -> str:
+        """Build zone 2 volume down command."""
+        if step is None:
+            return "ZVOL-"
+        else:
+            step_int = int(step * 10)
+            return f"ZVOL-({step_int})"
+            
+    @staticmethod
+    def volume_up(step: Optional[float] = None) -> str:
+        """Build volume up command with optional step."""
+        if step is None:
+            return "VOL+"
+        else:
+            step_int = int(step * 10)
+            return f"VOL+({step_int})"
+            
+    @staticmethod
+    def volume_down(step: Optional[float] = None) -> str:
+        """Build volume down command with optional step."""
+        if step is None:
+            return "VOL-"
+        else:
+            step_int = int(step * 10)
+            return f"VOL-({step_int})"

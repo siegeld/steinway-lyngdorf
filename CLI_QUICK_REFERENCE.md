@@ -16,6 +16,22 @@
 ./run_cli.sh zone2 off       # Turn off Zone 2
 ```
 
+## Volume Commands
+```bash
+./run_cli.sh volume get                      # Show current volume levels
+./run_cli.sh volume set -- -40               # Set to -40 dB (use -- for negative)
+./run_cli.sh volume up                       # Increase by 0.5 dB
+./run_cli.sh volume down                     # Decrease by 0.5 dB
+./run_cli.sh volume up --step 2              # Increase by 2 dB
+./run_cli.sh volume mute                     # Mute main zone
+./run_cli.sh volume unmute                   # Unmute main zone
+
+# Zone 2 volume
+./run_cli.sh volume set -- -50 --zone2      # Set Zone 2 to -50 dB
+./run_cli.sh volume up --zone2              # Increase Zone 2 volume
+./run_cli.sh volume mute --zone2            # Mute Zone 2
+```
+
 ## Monitor Mode
 ```bash
 ./run_cli.sh monitor                         # Monitor forever

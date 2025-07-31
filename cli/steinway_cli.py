@@ -28,6 +28,7 @@ logging.basicConfig(
     level=getattr(logging, log_level.upper()),
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
+logger = logging.getLogger(__name__)
 
 
 def get_env_default(key: str, default=None):
@@ -146,6 +147,122 @@ def zone2_off(device):
             print("Zone 2 powered off")
             
     asyncio.run(_off())
+
+
+@cli.group()
+@click.pass_obj
+def volume(device):
+    """Control volume."""
+    pass
+
+
+@volume.command('get')
+@click.pass_obj
+def volume_get(device):
+    """Get current volume."""
+    async def _get():
+        async with device:
+            # Main zone
+            vol = await device.volume.get()
+            print(f"Main zone: {vol:+.1f} dB")
+            
+            # Zone 2
+            z2_vol = await device.zone2_volume.get()
+            print(f"Zone 2: {z2_vol:+.1f} dB")
+            
+    asyncio.run(_get())
+
+
+@volume.command('set')
+@click.argument('level', type=float)
+@click.option('--zone2', is_flag=True, help='Set Zone 2 volume instead')
+@click.pass_obj
+def volume_set(device, level, zone2):
+    """Set volume to specific level in dB."""
+    async def _set():
+        async with device:
+            if zone2:
+                await device.zone2_volume.set(level)
+                print(f"Zone 2 volume set to {level:+.1f} dB")
+            else:
+                await device.volume.set(level)
+                print(f"Main zone volume set to {level:+.1f} dB")
+                
+    asyncio.run(_set())
+
+
+@volume.command('up')
+@click.option('--step', default=0.5, help='Step size in dB')
+@click.option('--zone2', is_flag=True, help='Control Zone 2 volume')
+@click.pass_obj
+def volume_up(device, step, zone2):
+    """Increase volume."""
+    async def _up():
+        async with device:
+            if zone2:
+                await device.zone2_volume.up(step)
+                new_vol = await device.zone2_volume.get()
+                print(f"Zone 2 volume: {new_vol:+.1f} dB")
+            else:
+                await device.volume.up(step)
+                new_vol = await device.volume.get()
+                print(f"Main zone volume: {new_vol:+.1f} dB")
+                
+    asyncio.run(_up())
+
+
+@volume.command('down')
+@click.option('--step', default=0.5, help='Step size in dB')
+@click.option('--zone2', is_flag=True, help='Control Zone 2 volume')
+@click.pass_obj
+def volume_down(device, step, zone2):
+    """Decrease volume."""
+    async def _down():
+        async with device:
+            if zone2:
+                await device.zone2_volume.down(step)
+                new_vol = await device.zone2_volume.get()
+                print(f"Zone 2 volume: {new_vol:+.1f} dB")
+            else:
+                await device.volume.down(step)
+                new_vol = await device.volume.get()
+                print(f"Main zone volume: {new_vol:+.1f} dB")
+                
+    asyncio.run(_down())
+
+
+@volume.command('mute')
+@click.option('--zone2', is_flag=True, help='Mute Zone 2')
+@click.pass_obj
+def volume_mute(device, zone2):
+    """Mute audio."""
+    async def _mute():
+        async with device:
+            if zone2:
+                await device.zone2_volume.mute()
+                print("Zone 2 muted")
+            else:
+                await device.volume.mute()
+                print("Main zone muted")
+                
+    asyncio.run(_mute())
+
+
+@volume.command('unmute')
+@click.option('--zone2', is_flag=True, help='Unmute Zone 2')
+@click.pass_obj
+def volume_unmute(device, zone2):
+    """Unmute audio."""
+    async def _unmute():
+        async with device:
+            if zone2:
+                await device.zone2_volume.unmute()
+                print("Zone 2 unmuted")
+            else:
+                await device.volume.unmute()
+                print("Main zone unmuted")
+                
+    asyncio.run(_unmute())
 
 
 @cli.command()

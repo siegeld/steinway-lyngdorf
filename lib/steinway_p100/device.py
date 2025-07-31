@@ -4,7 +4,7 @@ import logging
 from typing import Optional, Union
 
 from .connection import BaseConnection, TCPConnection, SerialConnection
-from .controls import PowerControl
+from .controls import PowerControl, VolumeControl
 from .constants import Zone, FeedbackLevel, DEFAULT_TCP_PORT
 from .protocol import CommandBuilder
 
@@ -27,6 +27,8 @@ class SteinwayP100Device:
         # Initialize controls
         self.power = PowerControl(connection, Zone.MAIN) if connection else None
         self.zone2_power = PowerControl(connection, Zone.ZONE2) if connection else None
+        self.volume = VolumeControl(connection, Zone.MAIN) if connection else None
+        self.zone2_volume = VolumeControl(connection, Zone.ZONE2) if connection else None
         
     @classmethod
     def from_tcp(cls, host: str, port: int = DEFAULT_TCP_PORT) -> "SteinwayP100Device":

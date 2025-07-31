@@ -47,6 +47,45 @@ class ResponseParser:
         raise ValueError(f"Invalid volume response: {response}")
         
     @staticmethod
+    def parse_zone2_volume(response: str) -> float:
+        """
+        Parse zone 2 volume response.
+        
+        Response format: !ZVOL(-550) to !ZVOL(240)
+        Returns: Volume in dB (-55.0 to +24.0)
+        """
+        match = re.match(r"!ZVOL\((-?\d+)\)", response)
+        if match:
+            return int(match.group(1)) / 10.0
+        raise ValueError(f"Invalid zone2 volume response: {response}")
+        
+    @staticmethod
+    def parse_mute(response: str) -> bool:
+        """
+        Parse mute status response.
+        
+        Response format: !MUTE(0) or !MUTE(1)
+        Returns: True if muted, False otherwise
+        """
+        match = re.match(r"!MUTE\((\d)\)", response)
+        if match:
+            return match.group(1) == "1"
+        raise ValueError(f"Invalid mute response: {response}")
+        
+    @staticmethod
+    def parse_zone2_mute(response: str) -> bool:
+        """
+        Parse zone 2 mute status response.
+        
+        Response format: !ZMUTE(0) or !ZMUTE(1)
+        Returns: True if muted, False otherwise
+        """
+        match = re.match(r"!ZMUTE\((\d)\)", response)
+        if match:
+            return match.group(1) == "1"
+        raise ValueError(f"Invalid zone2 mute response: {response}")
+        
+    @staticmethod
     def parse_source(response: str) -> Tuple[int, str]:
         """
         Parse source response.

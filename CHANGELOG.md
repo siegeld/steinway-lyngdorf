@@ -8,31 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Initial project structure and architecture
-- Core connection layer with TCP and Serial support
-- Protocol parser and command builder
-- Power control for main zone and Zone 2
-- CLI tool with environment variable support
-- Development setup with virtual environment
-- Project documentation (README, CLAUDE, CHANGELOG)
-- Modern Python packaging with pyproject.toml
-- Makefile for common development tasks
+- Nothing yet
 
 ### Changed
-- Nothing yet
-
-### Deprecated
-- Nothing yet
-
-### Removed
 - Nothing yet
 
 ### Fixed
 - Nothing yet
 
-### Security
-- Nothing yet
-
+## [0.1.1] - 2025-07-31
 ## [0.1.0] - 2024-XX-XX (Planned)
 
 ### Planned Features

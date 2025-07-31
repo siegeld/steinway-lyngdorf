@@ -147,11 +147,15 @@ pip install steinway-p100
 
 ### Home Assistant (via HACS)
 
-1. Add this repository to HACS as a custom repository
+1. Add this repository to HACS as a custom repository:
+   - URL: `https://github.com/siegeld/steinway-p100`
+   - Category: Integration
 2. Search for "Steinway Lyngdorf" in HACS
 3. Install the integration
 4. Restart Home Assistant
 5. Add integration via Settings → Devices & Services → Add Integration → Steinway Lyngdorf
+
+Note: The integration includes all required libraries, no additional dependencies needed.
 
 #### Home Assistant Features
 

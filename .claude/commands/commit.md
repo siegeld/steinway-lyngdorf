@@ -30,9 +30,15 @@ The commit process has two parts:
      - Common tasks
    - **.claude/commands/*.md**: Update any command documentation that changed
 
-3. **Review your documentation updates**
+3. **Sync library to custom component (if library changed)**
+   ```bash
+   make sync-hacs
+   ```
+
+4. **Review your changes**
    ```bash
    git diff *.md **/*.md
+   git status
    ```
 
 ## Part 2: Automated Execution (commit.sh handles this)

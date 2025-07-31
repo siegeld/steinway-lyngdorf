@@ -9,8 +9,8 @@ from typing import Any
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
-from steinway_p100 import SteinwayP100Device, PowerState
-from steinway_p100.exceptions import ConnectionError, TimeoutError
+from .steinway_p100 import SteinwayP100Device, PowerState
+from .steinway_p100.exceptions import ConnectionError, TimeoutError
 
 _LOGGER = logging.getLogger(__name__)
 

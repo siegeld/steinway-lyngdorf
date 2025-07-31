@@ -51,6 +51,7 @@ This is a Python library and Home Assistant integration for controlling Steinway
 3. Use type hints for all new code
 4. Follow existing code patterns
 5. Update CHANGELOG.md
+6. Run `make sync-hacs` after library changes (before committing)
 
 ### Testing Commands
 ```bash

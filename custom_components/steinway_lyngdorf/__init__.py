@@ -9,8 +9,8 @@ from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
 
-from steinway_p100 import SteinwayP100Device
-from steinway_p100.exceptions import ConnectionError
+from .steinway_p100 import SteinwayP100Device
+from .steinway_p100.exceptions import ConnectionError
 
 from .const import DOMAIN
 from .coordinator import SteinwayLyngdorfCoordinator

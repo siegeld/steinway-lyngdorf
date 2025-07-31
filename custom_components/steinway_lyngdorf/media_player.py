@@ -20,9 +20,9 @@ from homeassistant.helpers.entity_platform import (
 )
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from steinway_p100 import PowerState
-from steinway_p100.api.models import PlaybackState
-from steinway_p100.exceptions import CommandError
+from .steinway_p100 import PowerState
+from .steinway_p100.api.models import PlaybackState
+from .steinway_p100.exceptions import CommandError
 
 from .const import (
     ATTR_AUDIO_MODE,

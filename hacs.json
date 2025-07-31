@@ -1,0 +1,6 @@
+{
+  "name": "Steinway Lyngdorf",
+  "content_in_root": false,
+  "render_readme": true,
+  "homeassistant": "2023.12.0"
+}

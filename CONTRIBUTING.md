@@ -38,7 +38,7 @@ By participating in this project, you agree to be respectful and constructive in
 
 ```bash
 # Clone your fork
-git clone https://github.com/yourusername/steinway-p100.git
+git clone https://github.com/YOUR_USERNAME/steinway-p100.git
 cd steinway-p100
 
 # Setup development environment

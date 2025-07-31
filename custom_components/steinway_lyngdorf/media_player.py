@@ -1,0 +1,261 @@
+"""Media player platform for Steinway Lyngdorf."""
+from __future__ import annotations
+
+import logging
+from typing import Any
+
+import voluptuous as vol
+
+from homeassistant.components.media_player import (
+    MediaPlayerEntity,
+    MediaPlayerEntityFeature,
+    MediaPlayerState,
+)
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers import config_validation as cv
+from homeassistant.helpers.entity_platform import (
+    AddEntitiesCallback,
+    async_get_current_platform,
+)
+from homeassistant.helpers.update_coordinator import CoordinatorEntity
+
+from steinway_p100 import PowerState
+from steinway_p100.exceptions import CommandError
+
+from .const import (
+    ATTR_AUDIO_MODE,
+    ATTR_AUDIO_MODES,
+    ATTR_AUDIO_TYPE,
+    ATTR_DELAY_MS,
+    ATTR_MODE_INDEX,
+    ATTR_MODE_NAME,
+    ATTR_POSITION_INDEX,
+    ATTR_POSITION_NAME,
+    DOMAIN,
+    SERVICE_SET_AUDIO_MODE,
+    SERVICE_SET_LIPSYNC,
+    SERVICE_SET_ROOM_PERFECT,
+)
+from .coordinator import SteinwayLyngdorfCoordinator
+
+_LOGGER = logging.getLogger(__name__)
+
+# Conversion factor for Home Assistant volume (0-1) to device volume (dB)
+MIN_VOLUME_DB = -60.0  # Practical minimum for UI
+MAX_VOLUME_DB = 0.0    # Maximum volume
+
+
+async def async_setup_entry(
+    hass: HomeAssistant,
+    config_entry: ConfigEntry,
+    async_add_entities: AddEntitiesCallback,
+) -> None:
+    """Set up Steinway Lyngdorf media player from a config entry."""
+    coordinator = hass.data[DOMAIN][config_entry.entry_id]
+    
+    media_player = SteinwayLyngdorfMediaPlayer(coordinator, config_entry)
+    async_add_entities([media_player])
+    
+    # Register services
+    platform = async_get_current_platform()
+    
+    platform.async_register_entity_service(
+        SERVICE_SET_AUDIO_MODE,
+        {
+            vol.Optional(ATTR_MODE_INDEX): cv.positive_int,
+            vol.Optional(ATTR_MODE_NAME): cv.string,
+        },
+        "async_set_audio_mode",
+    )
+    
+    platform.async_register_entity_service(
+        SERVICE_SET_ROOM_PERFECT,
+        {
+            vol.Optional(ATTR_POSITION_INDEX): cv.positive_int,
+            vol.Optional(ATTR_POSITION_NAME): cv.string,
+        },
+        "async_set_room_perfect",
+    )
+    
+    platform.async_register_entity_service(
+        SERVICE_SET_LIPSYNC,
+        {
+            vol.Required(ATTR_DELAY_MS): vol.Coerce(int),
+        },
+        "async_set_lipsync",
+    )
+
+
+class SteinwayLyngdorfMediaPlayer(CoordinatorEntity[SteinwayLyngdorfCoordinator], MediaPlayerEntity):
+    """Representation of a Steinway Lyngdorf media player."""
+    
+    _attr_has_entity_name = True
+    _attr_name = None
+    
+    def __init__(self, coordinator: SteinwayLyngdorfCoordinator, config_entry: ConfigEntry) -> None:
+        """Initialize the media player."""
+        super().__init__(coordinator)
+        self._config_entry = config_entry
+        self._attr_unique_id = f"{config_entry.entry_id}_media_player"
+        self._attr_device_info = {
+            "identifiers": {(DOMAIN, config_entry.entry_id)},
+            "name": f"Steinway Lyngdorf {config_entry.data['host']}",
+            "manufacturer": "Steinway Lyngdorf",
+            "model": "P100/P200/P300",
+        }
+        
+        self._attr_supported_features = (
+            MediaPlayerEntityFeature.TURN_ON
+            | MediaPlayerEntityFeature.TURN_OFF
+            | MediaPlayerEntityFeature.VOLUME_SET
+            | MediaPlayerEntityFeature.VOLUME_STEP
+            | MediaPlayerEntityFeature.VOLUME_MUTE
+            | MediaPlayerEntityFeature.SELECT_SOURCE
+        )
+        
+        self._source_list: list[str] = []
+        self._audio_modes: list[str] = []
+        
+    async def async_added_to_hass(self) -> None:
+        """Run when entity is added to hass."""
+        await super().async_added_to_hass()
+        
+        # Load available sources and audio modes
+        try:
+            sources = await self.coordinator.device.source.get_sources()
+            self._source_list = [source.name for source in sources]
+            
+            modes = await self.coordinator.device.audio_mode.get_modes()
+            self._audio_modes = [mode.name for mode in modes]
+        except Exception:
+            _LOGGER.exception("Failed to load sources or audio modes")
+    
+    @property
+    def available(self) -> bool:
+        """Return if entity is available."""
+        return self.coordinator.available
+    
+    @property
+    def state(self) -> MediaPlayerState:
+        """Return the state of the device."""
+        if not self.coordinator.data:
+            return MediaPlayerState.OFF
+            
+        power_state = self.coordinator.data.get("power_state", PowerState.OFF)
+        if power_state == PowerState.ON:
+            return MediaPlayerState.ON
+        return MediaPlayerState.OFF
+    
+    @property
+    def volume_level(self) -> float | None:
+        """Return the volume level."""
+        if not self.coordinator.data or "volume" not in self.coordinator.data:
+            return None
+            
+        volume_db = self.coordinator.data["volume"]
+        return self._db_to_level(volume_db)
+    
+    @property
+    def is_volume_muted(self) -> bool:
+        """Return true if volume is muted."""
+        # The P100 doesn't report mute status reliably, so we track it locally
+        return False
+    
+    @property
+    def source(self) -> str | None:
+        """Return the current input source."""
+        if not self.coordinator.data:
+            return None
+        return self.coordinator.data.get("source_name")
+    
+    @property
+    def source_list(self) -> list[str]:
+        """Return the list of available input sources."""
+        return self._source_list
+    
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        """Return entity specific state attributes."""
+        attrs = {
+            ATTR_AUDIO_MODES: self._audio_modes,
+        }
+        
+        if self.coordinator.data:
+            attrs[ATTR_AUDIO_MODE] = self.coordinator.data.get("audio_mode")
+            attrs[ATTR_AUDIO_TYPE] = self.coordinator.data.get("audio_type")
+            
+        return attrs
+    
+    async def async_turn_on(self) -> None:
+        """Turn the media player on."""
+        await self.coordinator.device.power.on()
+        await self.coordinator.async_request_refresh()
+    
+    async def async_turn_off(self) -> None:
+        """Turn the media player off."""
+        await self.coordinator.device.power.off()
+        await self.coordinator.async_request_refresh()
+    
+    async def async_set_volume_level(self, volume: float) -> None:
+        """Set volume level, range 0..1."""
+        volume_db = self._level_to_db(volume)
+        await self.coordinator.device.volume.set(volume_db)
+        await self.coordinator.async_request_refresh()
+    
+    async def async_volume_up(self) -> None:
+        """Volume up the media player."""
+        await self.coordinator.device.volume.up(2.0)  # 2dB steps
+        await self.coordinator.async_request_refresh()
+    
+    async def async_volume_down(self) -> None:
+        """Volume down the media player."""
+        await self.coordinator.device.volume.down(2.0)  # 2dB steps
+        await self.coordinator.async_request_refresh()
+    
+    async def async_mute_volume(self, mute: bool) -> None:
+        """Mute (true) or unmute (false) media player."""
+        if mute:
+            await self.coordinator.device.volume.mute()
+        else:
+            await self.coordinator.device.volume.unmute()
+        await self.coordinator.async_request_refresh()
+    
+    async def async_select_source(self, source: str) -> None:
+        """Select input source."""
+        await self.coordinator.device.source.select_by_name(source)
+        await self.coordinator.async_request_refresh()
+    
+    async def async_set_audio_mode(self, mode_index: int | None = None, mode_name: str | None = None) -> None:
+        """Set audio processing mode (service call)."""
+        await self.coordinator.async_set_audio_mode(mode_index, mode_name)
+    
+    async def async_set_room_perfect(self, position_index: int | None = None, position_name: str | None = None) -> None:
+        """Set RoomPerfect position (service call)."""
+        if not self.coordinator.available:
+            raise Exception("Device not available")
+            
+        # This would need to be implemented in the library first
+        _LOGGER.warning("RoomPerfect control not yet implemented in library")
+    
+    async def async_set_lipsync(self, delay_ms: int) -> None:
+        """Set lipsync delay (service call)."""
+        if not self.coordinator.available:
+            raise Exception("Device not available")
+            
+        # This would need to be implemented in the library first
+        _LOGGER.warning("Lipsync control not yet implemented in library")
+    
+    def _db_to_level(self, db: float) -> float:
+        """Convert dB to volume level (0-1)."""
+        # Clamp to our UI range
+        db = max(MIN_VOLUME_DB, min(MAX_VOLUME_DB, db))
+        # Linear mapping from dB range to 0-1
+        return (db - MIN_VOLUME_DB) / (MAX_VOLUME_DB - MIN_VOLUME_DB)
+    
+    def _level_to_db(self, level: float) -> float:
+        """Convert volume level (0-1) to dB."""
+        # Ensure level is in 0-1 range
+        level = max(0.0, min(1.0, level))
+        # Linear mapping from 0-1 to dB range
+        return MIN_VOLUME_DB + (level * (MAX_VOLUME_DB - MIN_VOLUME_DB))

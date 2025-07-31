@@ -1,0 +1,79 @@
+set_audio_mode:
+  name: Set Audio Mode
+  description: Set the audio processing mode (Dolby, DTS, etc.)
+  target:
+    entity:
+      integration: steinway_lyngdorf
+      domain: media_player
+  fields:
+    mode_index:
+      name: Mode Index
+      description: The index of the audio mode to select
+      required: false
+      example: 5
+      selector:
+        number:
+          min: 0
+          max: 20
+    mode_name:
+      name: Mode Name
+      description: The name of the audio mode to select (partial match supported)
+      required: false
+      example: "Dolby"
+      selector:
+        text:
+
+set_room_perfect:
+  name: Set RoomPerfect Position
+  description: Set the RoomPerfect focus position
+  target:
+    entity:
+      integration: steinway_lyngdorf
+      domain: media_player
+  fields:
+    position_index:
+      name: Position Index
+      description: The index of the position (0=bypass, 1-4=focus positions, 9=global)
+      required: false
+      example: 1
+      selector:
+        select:
+          options:
+            - label: "Bypass"
+              value: "0"
+            - label: "Focus 1"
+              value: "1"
+            - label: "Focus 2"
+              value: "2"
+            - label: "Focus 3"
+              value: "3"
+            - label: "Focus 4"
+              value: "4"
+            - label: "Global"
+              value: "9"
+    position_name:
+      name: Position Name
+      description: The name of the position to select
+      required: false
+      example: "Focus 1"
+      selector:
+        text:
+
+set_lipsync:
+  name: Set Lipsync Delay
+  description: Set the audio/video synchronization delay
+  target:
+    entity:
+      integration: steinway_lyngdorf
+      domain: media_player
+  fields:
+    delay_ms:
+      name: Delay (ms)
+      description: The lipsync delay in milliseconds
+      required: true
+      example: 50
+      selector:
+        number:
+          min: -200
+          max: 200
+          unit_of_measurement: ms

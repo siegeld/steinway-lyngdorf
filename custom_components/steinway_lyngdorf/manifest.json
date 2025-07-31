@@ -1,0 +1,13 @@
+{
+  "domain": "steinway_lyngdorf",
+  "name": "Steinway Lyngdorf",
+  "codeowners": ["@siegeld"],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://github.com/siegeld/steinway-p100",
+  "integration_type": "device",
+  "iot_class": "local_push",
+  "issue_tracker": "https://github.com/siegeld/steinway-p100/issues",
+  "requirements": ["steinway-p100==0.1.2"],
+  "version": "0.1.0"
+}

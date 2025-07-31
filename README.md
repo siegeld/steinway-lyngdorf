@@ -21,7 +21,7 @@ Python library and Home Assistant integration for controlling Steinway & Sons P1
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/steinway-p100.git
+git clone https://github.com/siegeld/steinway-p100.git
 cd steinway-p100
 
 # Option 1: Quick install (recommended)
@@ -139,9 +139,23 @@ pip install steinway-p100
 ### Home Assistant (via HACS)
 
 1. Add this repository to HACS as a custom repository
-2. Install "Steinway P100" from HACS
-3. Restart Home Assistant
-4. Add integration via UI or configuration.yaml
+2. Search for "Steinway Lyngdorf" in HACS
+3. Install the integration
+4. Restart Home Assistant
+5. Add integration via Settings → Devices & Services → Add Integration → Steinway Lyngdorf
+
+#### Home Assistant Features
+
+- **Media Player Entity**
+  - Power on/off
+  - Volume control with mute
+  - Source selection
+  - Audio mode in attributes
+  
+- **Custom Services**
+  - `steinway_lyngdorf.set_audio_mode` - Select Dolby, DTS, Auro-3D modes
+  - `steinway_lyngdorf.set_room_perfect` - Select RoomPerfect positions (coming soon)
+  - `steinway_lyngdorf.set_lipsync` - Adjust audio/video sync (coming soon)
 
 ## Supported Models
 
@@ -166,7 +180,7 @@ steinway-p100/
 ├── lib/                      # Python library
 │   └── steinway_p100/
 ├── custom_components/        # Home Assistant integration
-│   └── steinway_p100/
+│   └── steinway_lyngdorf/
 ├── cli/                      # Command-line tool
 ├── tests/                    # Test suite
 └── examples/                 # Usage examples

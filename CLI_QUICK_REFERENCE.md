@@ -98,3 +98,36 @@ STEINWAY_LOG_LEVEL=INFO
 - Monitor mode shows TX (→) in green, RX (←) in blue
 - Press Ctrl+C to stop monitoring
 - Use `--debug` to troubleshoot connection issues
+- Negative volume values require `--` separator: `./run_cli.sh volume set -- -40`
+
+## Command Examples
+
+### Power Management
+```bash
+# Quick power cycle
+./run_cli.sh off && sleep 5 && ./run_cli.sh on
+
+# Turn on and set volume
+./run_cli.sh on && sleep 2 && ./run_cli.sh volume set -- -35
+
+# Full system status
+./run_cli.sh status && ./run_cli.sh volume get && ./run_cli.sh source get && ./run_cli.sh audio get
+```
+
+### Source and Audio Setup
+```bash
+# Select Blu-ray and set audio mode
+./run_cli.sh source set "Blu-ray" && ./run_cli.sh audio set "Dolby"
+
+# List all options
+./run_cli.sh source list && ./run_cli.sh audio modes
+```
+
+### Debugging
+```bash
+# Monitor with debug logging
+./run_cli.sh --debug monitor
+
+# Test connection
+./run_cli.sh --host p100.local --debug status
+```

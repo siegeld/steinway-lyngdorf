@@ -42,9 +42,12 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             host = user_input[CONF_HOST]
             port = user_input[CONF_PORT]
             
+            # DNS resolution needs to be done in executor to avoid blocking
             try:
-                ip = socket.gethostbyname(host)
-                _LOGGER.info(f"DNS resolved {host} to {ip}")
+                import asyncio
+                loop = asyncio.get_running_loop()
+                ip = await loop.run_in_executor(None, socket.gethostbyname, host)
+                _LOGGER.debug(f"DNS resolved {host} to {ip}")
             except socket.gaierror as e:
                 _LOGGER.error(f"DNS resolution failed for {host}: {e}")
                 errors["base"] = "cannot_connect"
@@ -58,10 +61,10 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             device = SteinwayP100Device.from_tcp(host, port)
             
             try:
-                _LOGGER.info(f"Attempting to connect to {host}:{port}")
+                _LOGGER.debug(f"Attempting to connect to {host}:{port}")
                 await device.connect()
                 await device.disconnect()
-                _LOGGER.info(f"Successfully connected to {host}:{port}")
+                _LOGGER.debug(f"Successfully connected to {host}:{port}")
             except ConnectionError as e:
                 _LOGGER.error(f"Connection error to {host}:{port}: {e}")
                 errors["base"] = "cannot_connect"

@@ -1,0 +1,17 @@
+version: '3.8'
+services:
+  homeassistant:
+    container_name: homeassistant
+    image: ghcr.io/home-assistant/home-assistant:stable
+    volumes:
+      - ./config:/config
+      - /etc/localtime:/etc/localtime:ro
+    restart: unless-stopped
+    network_mode: host
+    # Add DNS search domain to resolve short hostnames
+    dns_search:
+      - siegel.com
+    # Optional: specify DNS servers if needed
+    # dns:
+    #   - 192.168.1.1
+    #   - 8.8.8.8

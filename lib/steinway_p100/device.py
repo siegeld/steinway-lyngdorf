@@ -38,12 +38,7 @@ class SteinwayP100Device:
         self.audio_mode = AudioModeControl(connection) if connection else None
         
         # Initialize media API client if host provided
-        # Strip domain name for HTTP API (it only accepts short hostname)
-        if host:
-            http_host = host.split('.')[0]  # Get just the hostname part
-            self.media = MediaApiClient(http_host)
-        else:
-            self.media = None
+        self.media = MediaApiClient(host) if host else None
 
     @classmethod
     def from_tcp(cls, host: str, port: int = DEFAULT_TCP_PORT) -> "SteinwayP100Device":

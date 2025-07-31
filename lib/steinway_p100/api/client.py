@@ -31,7 +31,7 @@ class MediaApiClient:
         self._session: Optional[aiohttp.ClientSession] = None
         self._api_available = True
         self._last_403_logged = False
-        logger.warning(f"MediaApiClient initialized with host={host}, port={port}, base_url={self.base_url}")
+        logger.debug(f"MediaApiClient initialized with host={host}, port={port}, base_url={self.base_url}")
     
     async def __aenter__(self):
         """Async context manager entry."""
@@ -73,10 +73,10 @@ class MediaApiClient:
             "Host": f"{self.host}:{self.port}"
         }
         
-        logger.warning(f"HTTP API Request: GET {url}")
-        logger.warning(f"Params: {params}")
-        logger.warning(f"Headers: {headers}")
-        logger.warning(f"Base URL: {self.base_url}")
+        logger.debug(f"HTTP API Request: GET {url}")
+        logger.debug(f"Params: {params}")
+        logger.debug(f"Headers: {headers}")
+        logger.debug(f"Base URL: {self.base_url}")
         
         try:
             async with self._session.get(url, params=params, headers=headers, timeout=5) as response:
@@ -88,12 +88,12 @@ class MediaApiClient:
                     self._api_available = False
                     if not self._last_403_logged:
                         response_text = await response.text()
-                        logger.warning(f"HTTP API access forbidden (403). Media features will be disabled.")
-                        logger.warning(f"Response status: {response.status}")
-                        logger.warning(f"Response headers: {dict(response.headers)}")
-                        logger.warning(f"Response body: {response_text[:500]}")  # First 500 chars
-                        logger.warning(f"Request was to: {url}")
-                        logger.warning(f"Using host: {self.host}:{self.port}")
+                        logger.error(f"HTTP API access forbidden (403). Media features will be disabled.")
+                        logger.debug(f"Response status: {response.status}")
+                        logger.debug(f"Response headers: {dict(response.headers)}")
+                        logger.debug(f"Response body: {response_text[:500]}")  # First 500 chars
+                        logger.debug(f"Request was to: {url}")
+                        logger.debug(f"Using host: {self.host}:{self.port}")
                         self._last_403_logged = True
                     return None
                 else:
@@ -215,9 +215,9 @@ class MediaApiClient:
             "Host": f"{self.host}:{self.port}"
         }
         
-        logger.warning(f"HTTP API Control Request: GET {url}")
-        logger.warning(f"Control Params: {params}")
-        logger.warning(f"Control Headers: {headers}")
+        logger.debug(f"HTTP API Control Request: GET {url}")
+        logger.debug(f"Control Params: {params}")
+        logger.debug(f"Control Headers: {headers}")
         
         try:
             async with self._session.get(url, params=params, headers=headers, timeout=5) as response:

@@ -37,8 +37,11 @@ class TCPConnection(BaseConnection):
 
         except asyncio.TimeoutError:
             raise ConnectionError(f"Connection timeout to {self.host}:{self.port}")
+        except OSError as e:
+            # This includes socket.gaierror for DNS failures
+            raise ConnectionError(f"Failed to connect to {self.host}:{self.port}: {e}")
         except Exception as e:
-            raise ConnectionError(f"Failed to connect: {e}")
+            raise ConnectionError(f"Unexpected error connecting to {self.host}:{self.port}: {e}")
 
     async def disconnect(self) -> None:
         """Close TCP connection."""

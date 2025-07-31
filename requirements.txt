@@ -1,0 +1,7 @@
+# Core dependencies
+pyserial-asyncio>=0.6
+click>=8.0
+python-dotenv>=0.19
+
+# Install the library in development mode
+-e ./lib

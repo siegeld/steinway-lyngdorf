@@ -14,6 +14,8 @@ Python library and Home Assistant integration for controlling Steinway & Sons P1
 - 🔄 **Async/Await**: Modern Python async implementation
 - 📡 **Real-time Updates**: Automatic status updates with configurable feedback levels
 - 🎭 **Multi-zone**: Control main zone and Zone 2 independently
+- 🎵 **Media Information**: Track metadata, playback state, and audio format via HTTP API
+- ⏯️ **Media Control**: Play, pause, next, and previous track commands
 
 ## Quick Start
 
@@ -93,6 +95,13 @@ make run-cli ARGS="status"
 python cli/steinway_cli.py monitor                    # Monitor forever
 python cli/steinway_cli.py monitor --duration 30      # Monitor for 30 seconds
 python cli/steinway_cli.py monitor --feedback 2       # Show command echoes too
+
+# Media playback control (requires HTTP API on port 8080)
+python cli/steinway_cli.py media info                 # Show current track info
+python cli/steinway_cli.py media play                 # Resume playback
+python cli/steinway_cli.py media pause                # Pause playback
+python cli/steinway_cli.py media next                 # Skip to next track
+python cli/steinway_cli.py media prev                 # Skip to previous track
 ```
 
 **Monitor Mode**: The `monitor` command shows all communication between the CLI and the device in real-time:
@@ -151,6 +160,10 @@ pip install steinway-p100
   - Volume control with mute
   - Source selection
   - Audio mode in attributes
+  - Media playback controls (play, pause, next, previous)
+  - Now playing information (title, artist, album)
+  - Media position and duration
+  - Audio format details in attributes
   
 - **Custom Services**
   - `steinway_lyngdorf.set_audio_mode` - Select Dolby, DTS, Auro-3D modes

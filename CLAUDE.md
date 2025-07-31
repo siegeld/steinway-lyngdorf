@@ -32,6 +32,9 @@ This is a Python library and Home Assistant integration for controlling Steinway
 - Home Assistant media_player entity
 - Custom services for advanced features
 - Connection management with auto-reconnect
+- HTTP API client for media information
+- Media playback controls (play/pause/next/previous)
+- Media metadata display in Home Assistant
 
 ### To-Do
 - RoomPerfect position control

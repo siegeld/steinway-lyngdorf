@@ -31,7 +31,7 @@ class MediaApiClient:
         self._session: Optional[aiohttp.ClientSession] = None
         self._api_available = True
         self._last_403_logged = False
-        logger.info(f"MediaApiClient initialized with host={host}, port={port}, base_url={self.base_url}")
+        logger.warning(f"MediaApiClient initialized with host={host}, port={port}, base_url={self.base_url}")
     
     async def __aenter__(self):
         """Async context manager entry."""
@@ -73,10 +73,10 @@ class MediaApiClient:
             "Host": f"{self.host}:{self.port}"
         }
         
-        logger.info(f"HTTP API Request: GET {url}")
-        logger.info(f"Params: {params}")
-        logger.info(f"Headers: {headers}")
-        logger.info(f"Base URL: {self.base_url}")
+        logger.warning(f"HTTP API Request: GET {url}")
+        logger.warning(f"Params: {params}")
+        logger.warning(f"Headers: {headers}")
+        logger.warning(f"Base URL: {self.base_url}")
         
         try:
             async with self._session.get(url, params=params, headers=headers, timeout=5) as response:
@@ -215,10 +215,22 @@ class MediaApiClient:
             "Host": f"{self.host}:{self.port}"
         }
         
+        logger.warning(f"HTTP API Control Request: GET {url}")
+        logger.warning(f"Control Params: {params}")
+        logger.warning(f"Control Headers: {headers}")
+        
         try:
             async with self._session.get(url, params=params, headers=headers, timeout=5) as response:
                 if response.status == 200:
                     return True
+                elif response.status == 403:
+                    response_text = await response.text()
+                    logger.error(f"Control command failed: {response.status}")
+                    logger.error(f"Response headers: {dict(response.headers)}")
+                    logger.error(f"Response body: {response_text[:500]}")
+                    logger.error(f"Request was to: {url}")
+                    logger.error(f"With params: {params}")
+                    return False
                 else:
                     logger.error(f"Control command failed: {response.status}")
                     return False

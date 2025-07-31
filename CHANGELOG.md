@@ -16,6 +16,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Nothing yet
 
+## [0.3.5] - 2025-07-31
+
+### Fixed
+- Changed debug WARNING logs to DEBUG level to reduce log noise
+- Fixed DNS resolution for short hostnames in Docker environments
+- HTTP API now correctly uses short hostnames instead of FQDNs
+
 ## [0.3.4] - 2025-07-31
 ## [0.3.3] - 2025-07-31
 ## [0.3.2] - 2025-07-31
@@ -98,7 +105,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Complete API documentation
 - Serial connection support
 
-[Unreleased]: https://github.com/siegeld/steinway-p100/compare/v0.1.2...HEAD
+[Unreleased]: https://github.com/siegeld/steinway-p100/compare/v0.3.5...HEAD
+[0.3.5]: https://github.com/siegeld/steinway-p100/compare/v0.3.4...v0.3.5
+[0.3.4]: https://github.com/siegeld/steinway-p100/compare/v0.3.3...v0.3.4
+[0.3.3]: https://github.com/siegeld/steinway-p100/compare/v0.3.2...v0.3.3
+[0.3.2]: https://github.com/siegeld/steinway-p100/compare/v0.3.1...v0.3.2
+[0.3.1]: https://github.com/siegeld/steinway-p100/compare/v0.3.0...v0.3.1
+[0.3.0]: https://github.com/siegeld/steinway-p100/compare/v0.2.1...v0.3.0
+[0.2.1]: https://github.com/siegeld/steinway-p100/compare/v0.2.0...v0.2.1
+[0.2.0]: https://github.com/siegeld/steinway-p100/compare/v0.1.3...v0.2.0
+[0.1.3]: https://github.com/siegeld/steinway-p100/compare/v0.1.2...v0.1.3
 [0.1.2]: https://github.com/siegeld/steinway-p100/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/siegeld/steinway-p100/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/siegeld/steinway-p100/releases/tag/v0.1.0

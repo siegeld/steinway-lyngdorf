@@ -16,6 +16,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Nothing yet
 
+## [0.3.6] - 2025-07-31
+
+### Fixed
+- Media metadata now displays correctly in Home Assistant (added media_content_id, media_content_type, media_image_url)
+- Mute functionality in Home Assistant (tracks state locally since P100 doesn't respond to MUTE? reliably)
+
 ## [0.3.5] - 2025-07-31
 
 ### Fixed
@@ -105,7 +111,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Complete API documentation
 - Serial connection support
 
-[Unreleased]: https://github.com/siegeld/steinway-p100/compare/v0.3.5...HEAD
+[Unreleased]: https://github.com/siegeld/steinway-p100/compare/v0.3.6...HEAD
+[0.3.6]: https://github.com/siegeld/steinway-p100/compare/v0.3.5...v0.3.6
 [0.3.5]: https://github.com/siegeld/steinway-p100/compare/v0.3.4...v0.3.5
 [0.3.4]: https://github.com/siegeld/steinway-p100/compare/v0.3.3...v0.3.4
 [0.3.3]: https://github.com/siegeld/steinway-p100/compare/v0.3.2...v0.3.3

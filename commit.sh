@@ -169,5 +169,12 @@ if git remote | grep -q '^nfsrbr1$'; then
     git push nfsrbr1 "v$NEW_VERSION"
 fi
 
+# Push to github if it exists
+if git remote | grep -q '^github$'; then
+    echo -e "Pushing to github..."
+    git push github main
+    git push github "v$NEW_VERSION"
+fi
+
 echo ""
 echo -e "${GREEN}✓ All done!${NC}"

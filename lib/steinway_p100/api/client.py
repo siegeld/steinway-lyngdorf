@@ -31,6 +31,7 @@ class MediaApiClient:
         self._session: Optional[aiohttp.ClientSession] = None
         self._api_available = True
         self._last_403_logged = False
+        logger.info(f"MediaApiClient initialized with host={host}, port={port}, base_url={self.base_url}")
     
     async def __aenter__(self):
         """Async context manager entry."""
@@ -68,8 +69,14 @@ class MediaApiClient:
             "Accept-Language": "en-US,en;q=0.9",
             "Cache-Control": "no-cache",
             "Pragma": "no-cache",
-            "Referer": f"http://{self.host}:{self.port}/"
+            "Referer": f"http://{self.host}:{self.port}/",
+            "Host": f"{self.host}:{self.port}"
         }
+        
+        logger.info(f"HTTP API Request: GET {url}")
+        logger.info(f"Params: {params}")
+        logger.info(f"Headers: {headers}")
+        logger.info(f"Base URL: {self.base_url}")
         
         try:
             async with self._session.get(url, params=params, headers=headers, timeout=5) as response:
@@ -80,7 +87,13 @@ class MediaApiClient:
                 elif response.status == 403:
                     self._api_available = False
                     if not self._last_403_logged:
-                        logger.warning("HTTP API access forbidden (403). Media features will be disabled.")
+                        response_text = await response.text()
+                        logger.warning(f"HTTP API access forbidden (403). Media features will be disabled.")
+                        logger.warning(f"Response status: {response.status}")
+                        logger.warning(f"Response headers: {dict(response.headers)}")
+                        logger.warning(f"Response body: {response_text[:500]}")  # First 500 chars
+                        logger.warning(f"Request was to: {url}")
+                        logger.warning(f"Using host: {self.host}:{self.port}")
                         self._last_403_logged = True
                     return None
                 else:
@@ -198,7 +211,8 @@ class MediaApiClient:
             "Accept-Language": "en-US,en;q=0.9",
             "Cache-Control": "no-cache",
             "Pragma": "no-cache",
-            "Referer": f"http://{self.host}:{self.port}/"
+            "Referer": f"http://{self.host}:{self.port}/",
+            "Host": f"{self.host}:{self.port}"
         }
         
         try:

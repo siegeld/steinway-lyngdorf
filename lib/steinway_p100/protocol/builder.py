@@ -98,6 +98,11 @@ class CommandBuilder:
         return "SRC?"
         
     @staticmethod
+    def source_list_query() -> str:
+        """Build source list query command."""
+        return "SRCS?"
+        
+    @staticmethod
     def zone2_volume_set(volume: float) -> str:
         """Build zone 2 volume set command."""
         vol_int = int(volume * 10)
@@ -140,3 +145,23 @@ class CommandBuilder:
         else:
             step_int = int(step * 10)
             return f"VOL-({step_int})"
+            
+    @staticmethod
+    def audio_mode_select(index: int) -> str:
+        """Build audio mode select command."""
+        return f"AUDMODE({index})"
+        
+    @staticmethod
+    def audio_mode_list_query() -> str:
+        """Build audio mode list query command."""
+        return "AUDMODEL?"
+        
+    @staticmethod
+    def audio_mode_query() -> str:
+        """Build audio mode query command."""
+        return "AUDMODE?"
+        
+    @staticmethod
+    def audio_type_query() -> str:
+        """Build audio type query command."""
+        return "AUDTYPE?"

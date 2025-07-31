@@ -32,6 +32,27 @@
 ./run_cli.sh volume mute --zone2            # Mute Zone 2
 ```
 
+## Source Commands
+```bash
+./run_cli.sh source list                     # List all available sources
+./run_cli.sh source get                      # Show current source
+./run_cli.sh source set 0                    # Select source by index
+./run_cli.sh source set DVD                  # Select source by name (partial match)
+./run_cli.sh source next                     # Select next source
+./run_cli.sh source prev                     # Select previous source
+```
+
+## Audio Mode Commands
+```bash
+./run_cli.sh audio modes                     # List all available audio modes
+./run_cli.sh audio get                       # Show current audio mode
+./run_cli.sh audio set 0                     # Select mode by index
+./run_cli.sh audio set Dolby                 # Select mode by name (partial match)
+./run_cli.sh audio next                      # Select next audio mode
+./run_cli.sh audio prev                      # Select previous audio mode
+./run_cli.sh audio type                      # Show current audio format info
+```
+
 ## Monitor Mode
 ```bash
 ./run_cli.sh monitor                         # Monitor forever

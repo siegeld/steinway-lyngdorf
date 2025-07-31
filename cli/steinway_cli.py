@@ -265,6 +265,186 @@ def volume_unmute(device, zone2):
     asyncio.run(_unmute())
 
 
+@cli.group()
+@click.pass_obj
+def source(device):
+    """Source selection commands."""
+    pass
+
+
+@source.command('list')
+@click.pass_obj
+def source_list(device):
+    """List available sources."""
+    async def _list():
+        async with device:
+            sources = await device.source.get_sources()
+            current = await device.source.get_current()
+            
+            print("Available sources:")
+            for src in sources:
+                marker = " *" if src.index == current.index else ""
+                print(f"  {src.index}: {src.name}{marker}")
+                
+    asyncio.run(_list())
+
+
+@source.command('get')
+@click.pass_obj
+def source_get(device):
+    """Show current source."""
+    async def _get():
+        async with device:
+            current = await device.source.get_current()
+            print(f"Current source: {current.index} - {current.name}")
+            
+    asyncio.run(_get())
+
+
+@source.command('set')
+@click.argument('source', required=True)
+@click.pass_obj
+def source_set(device, source):
+    """Select a source by index or name."""
+    async def _set():
+        async with device:
+            # Try as index first
+            try:
+                index = int(source)
+                await device.source.select(index)
+                current = await device.source.get_current()
+                print(f"Selected source: {current.index} - {current.name}")
+            except ValueError:
+                # Try as name
+                await device.source.select_by_name(source)
+                current = await device.source.get_current()
+                print(f"Selected source: {current.index} - {current.name}")
+                
+    asyncio.run(_set())
+
+
+@source.command('next')
+@click.pass_obj
+def source_next(device):
+    """Select next source."""
+    async def _next():
+        async with device:
+            await device.source.next()
+            current = await device.source.get_current()
+            print(f"Selected source: {current.index} - {current.name}")
+            
+    asyncio.run(_next())
+
+
+@source.command('prev')
+@click.pass_obj
+def source_prev(device):
+    """Select previous source."""
+    async def _prev():
+        async with device:
+            await device.source.previous()
+            current = await device.source.get_current()
+            print(f"Selected source: {current.index} - {current.name}")
+            
+    asyncio.run(_prev())
+
+
+@cli.group()
+@click.pass_obj
+def audio(device):
+    """Audio mode and processing commands."""
+    pass
+
+
+@audio.command('modes')
+@click.pass_obj
+def audio_modes(device):
+    """List available audio processing modes."""
+    async def _modes():
+        async with device:
+            modes = await device.audio_mode.get_modes()
+            current = await device.audio_mode.get_current()
+            
+            print("Available audio modes:")
+            for mode in modes:
+                marker = " *" if mode.index == current.index else ""
+                print(f"  {mode.index}: {mode.name}{marker}")
+                
+    asyncio.run(_modes())
+
+
+@audio.command('get')
+@click.pass_obj
+def audio_get(device):
+    """Show current audio mode."""
+    async def _get():
+        async with device:
+            current = await device.audio_mode.get_current()
+            print(f"Current audio mode: {current.index} - {current.name}")
+            
+    asyncio.run(_get())
+
+
+@audio.command('set')
+@click.argument('mode', required=True)
+@click.pass_obj
+def audio_set(device, mode):
+    """Select an audio mode by index or name."""
+    async def _set():
+        async with device:
+            # Try as index first
+            try:
+                index = int(mode)
+                await device.audio_mode.select(index)
+                current = await device.audio_mode.get_current()
+                print(f"Selected audio mode: {current.index} - {current.name}")
+            except ValueError:
+                # Try as name
+                await device.audio_mode.select_by_name(mode)
+                current = await device.audio_mode.get_current()
+                print(f"Selected audio mode: {current.index} - {current.name}")
+                
+    asyncio.run(_set())
+
+
+@audio.command('next')
+@click.pass_obj
+def audio_next(device):
+    """Select next audio mode."""
+    async def _next():
+        async with device:
+            await device.audio_mode.next()
+            current = await device.audio_mode.get_current()
+            print(f"Selected audio mode: {current.index} - {current.name}")
+            
+    asyncio.run(_next())
+
+
+@audio.command('prev')
+@click.pass_obj
+def audio_prev(device):
+    """Select previous audio mode."""
+    async def _prev():
+        async with device:
+            await device.audio_mode.previous()
+            current = await device.audio_mode.get_current()
+            print(f"Selected audio mode: {current.index} - {current.name}")
+            
+    asyncio.run(_prev())
+
+
+@audio.command('type')
+@click.pass_obj
+def audio_type(device):
+    """Show current audio input type."""
+    async def _type():
+        async with device:
+            audio_type = await device.audio_mode.get_audio_type()
+            print(f"Audio input type: {audio_type}")
+            
+    asyncio.run(_type())
+
+
 @cli.command()
 @click.pass_obj
 @click.option('--duration', '-d', default=0, help='Monitor duration in seconds (0=forever)')
